@@ -33,7 +33,7 @@ exo_night <- exo %>% filter(hour(datetime) < 5) %>%
   summarize(across(chl_rfu:temp_C, mean)) %>%
   ungroup() %>%
   select(pond, year, doy,chl_rfu, chl_ugl, pc_rfu, pc_ugl, do_sat, do_mgl, pH, temp_C)
-write.csv(exo_night, './Output and Intermediate Files/EXO Nightly Averages.csv')
+write.csv(exo_night, './Output and Intermediate Files/EXO Nightly Averages.csv', row.names = F)
 
 #Filter to relevant time periods and add storm info to df#####
 
@@ -118,7 +118,7 @@ exo_night_pre <- exo_night_storms %>% filter(timesincestormstart == 0) %>%
 exo_night_storms <- left_join(exo_night_storms, exo_night_pre)
 
 #Export for use in figures script
-write.csv(exo_night_storms, './Output and Intermediate Files/EXO Nightly Averages with Storm Info.csv')
+write.csv(exo_night_storms, './Output and Intermediate Files/EXO Nightly Averages with Storm Info.csv', row.names = F)
 
 #Filter to only storms with pre data
 storms <- left_join(storms, exo_night_pre) %>%
