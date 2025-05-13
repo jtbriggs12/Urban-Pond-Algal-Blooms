@@ -10,12 +10,10 @@ library(ggeffects)
 library(ggnewscale)
 library(ggforce)
 
-setwd('C:/Users/Jessica Briggs/Box/Dissertation/Sondes & Ponds/Intermediate Data Products')
-
 #To add in superscripts - use expression function
 
 #Read in all required data######
-level <- read.csv('./Corrected Max Water Levels Strickers and Tiedemans 2022 to 2024.csv') %>%
+level <- read.csv('./Input Data Files/Corrected Max Water Levels Strickers and Tiedemans 2022 to 2024.csv') %>%
   filter(!(pond == 'Strickers' & year == '2022' & doy >= 182)) %>%
   filter(!(pond == 'Tiedemans' & year == '2023' & doy <= 165)) %>%
   group_by(pond,year,doy) %>%
@@ -23,12 +21,12 @@ level <- read.csv('./Corrected Max Water Levels Strickers and Tiedemans 2022 to 
   ungroup() %>%
   complete(pond, year, doy, fill = list(mndepth_m = 0))
 
-level_all <- read.csv('./Corrected Max Water Levels Strickers and Tiedemans 2022 to 2024.csv') %>%
+level_all <- read.csv('./Input Data Files/Corrected Max Water Levels Strickers and Tiedemans 2022 to 2024.csv') %>%
   filter(!(pond == 'Strickers' & year == '2022' & doy >= 182)) %>%
   filter(!(pond == 'Tiedemans' & year == '2023' & doy <= 165)) %>%
   mutate(datetime = as.POSIXct(datetime))
 
-precip <- read.csv('C:/Users/Jessica Briggs/Box/CAREER Grant/Data/Meteo Data/CoCoRaHS Data Clean.csv') %>%
+precip <- read.csv('./Input Data Files/CoCoRaHS Data Clean.csv') %>%
   filter(is.na(multiday)) %>%
   #summarize into useful averages for Strickers and Tied
   filter(station %in% c('WI-DA-46','WI-DA-60')) %>% # Only closest stations
@@ -39,15 +37,15 @@ precip <- read.csv('C:/Users/Jessica Briggs/Box/CAREER Grant/Data/Meteo Data/CoC
          doy = yday(date),
          year = year(date))
 
-stormresp <- read.csv('./Quantitative Pigment Responses and Potential Explanatory Variables.csv') %>%
+stormresp <- read.csv('./Output and Intermediate Files/Quantitative Pigment Responses and Potential Explanatory Variables.csv') %>%
   mutate(stormdate = as.POSIXct(paste(stormdoy,year), format = '%j %Y'))
 
-allstorms <-  read.csv('./Storms Above Thresholds.csv') %>%
+allstorms <-  read.csv('./Output and Intermediate Files/Storms Above Thresholds.csv') %>%
   mutate(stormdate = as.POSIXct(paste(yday(risestarttime),year), format = '%j %Y'))
 
-exo_night_storms <- read.csv('./EXO Nightly Averages with Storm Numbers.csv')
+exo_night_storms <- read.csv('./Output and Intermediate Files/EXO Nightly Averages with Storm Info.csv')
 
-exo <- read.csv('C:/Users/Jessica Briggs/Box/CAREER Grant/Data/Sensors/EXO/EXO Full dataset.csv') %>% 
+exo <- read.csv('./Input Data Files/EXO Full dataset.csv') %>% 
   mutate(datetime = as.POSIXct(datetime),
          year = year(datetime),
          doy = yday(datetime),
