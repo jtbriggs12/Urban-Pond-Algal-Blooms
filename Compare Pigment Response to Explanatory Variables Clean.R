@@ -135,19 +135,25 @@ summary(pc_riseresp_mod4)
 #Differences between ponds#####
 #Get nicer dataframe to compare
 pondsub <- stormresp %>%
-  select(pond, stormdoy, year, rise_points, rise_chl_percch, post10_chl_percch, delay_chl_slope)
+  select(pond, stormdoy, year, rise_points, rise_chl_percch, post10_chl_percch, delay_chl_slope, rise_pc_percch, post10_pc_percch, delay_pc_slope)
 
 tiedsub <- pondsub %>% filter(pond == 'Tiedemans') %>%
   rename(t_rise_points = rise_points,
          t_rise_chl_percch = rise_chl_percch,
          t_post10_chl_percch = post10_chl_percch, 
-         t_delay_chl_slope = delay_chl_slope) %>%
+         t_delay_chl_slope = delay_chl_slope,
+         t_rise_pc_percch = rise_pc_percch,
+         t_post10_pc_percch = post10_pc_percch,
+         t_delay_pc_slope = delay_pc_slope) %>%
   select(-pond)
 stricksub <- pondsub %>% filter(pond == 'Strickers') %>%
   rename(s_rise_points = rise_points,
          s_rise_chl_percch = rise_chl_percch,
          s_post10_chl_percch = post10_chl_percch, 
-         s_delay_chl_slope = delay_chl_slope) %>%
+         s_delay_chl_slope = delay_chl_slope,
+         s_rise_pc_percch = rise_pc_percch,
+         s_post10_pc_percch = post10_pc_percch,
+         s_delay_pc_slope = delay_pc_slope) %>%
   select(-pond)
 
 pondsub2 <- full_join(stricksub, tiedsub) %>%
@@ -157,12 +163,18 @@ pondsub2 <- full_join(stricksub, tiedsub) %>%
 shapiro.test(pondsub2$s_rise_chl_percch - pondsub2$t_rise_chl_percch)
 shapiro.test(pondsub2$s_post10_chl_percch - pondsub2$t_post10_chl_percch)
 shapiro.test(pondsub2$s_delay_chl_slope - pondsub2$t_delay_chl_slope) #Not normal - these ones need to be assessed with nonparametric tests
+shapiro.test(pondsub2$s_rise_pc_percch - pondsub2$t_rise_pc_percch)
+shapiro.test(pondsub2$s_post10_pc_percch - pondsub2$t_post10_pc_percch)
+shapiro.test(pondsub2$s_delay_pc_slope - pondsub2$t_delay_pc_slope) #Not normal - these ones need to be assessed with nonparametric tests
 
 #T-tests with subbed data
 #rise
 t.test(pondsub2$s_rise_chl_percch, pondsub2$t_rise_chl_percch, paired = F, alternative = 'two.sided') #Not different
 t.test(pondsub2$s_post10_chl_percch, pondsub2$t_post10_chl_percch, paired = F, alternative = 'two.sided') #Not diff
 wilcox.test(pondsub2$s_delay_chl_slope, pondsub2$t_delay_chl_slope, paired = F, alternative = 'two.sided') #Not diff
+t.test(pondsub2$s_rise_pc_percch, pondsub2$t_rise_pc_percch, paired = F, alternative = 'two.sided') #Not different
+t.test(pondsub2$s_post10_pc_percch, pondsub2$t_post10_pc_percch, paired = F, alternative = 'two.sided') #Not diff
+wilcox.test(pondsub2$s_delay_pc_slope, pondsub2$t_delay_pc_slope, paired = F, alternative = 'two.sided') #Not diff
 
 #Ttests with all data
 t.test(tiedsub$t_rise_chl_percch, stricksub$s_rise_chl_percch, paired = F, alternative = 'two.sided')

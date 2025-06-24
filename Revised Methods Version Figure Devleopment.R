@@ -380,7 +380,8 @@ exo_night_endrise <- exo_night_storms %>%
 
 delayresp_plotinput <- left_join(exo_delay, exo_night_endrise) %>%
   mutate(dayssinceriseend = doy - riseoverdoy,
-         delay_deltachl = (chl_ugl - endrise_chl_ugl) )%>%
+         delay_deltachl = (chl_ugl - endrise_chl_ugl),
+         delay_deltapc = (pc_ugl - endrise_pc_ugl))%>%
   filter(timesincestormstart <= 10 & dayssinceriseend >= 0)
 
 exo_night_storms_sum <- exo_night_storms %>%
@@ -411,9 +412,11 @@ exo_delay_sum <- delayresp_plotinput %>%
   group_by(pond, timesincestormstart) %>%
   summarize(avg_deltachl = median(delay_deltachl, na.rm = T),
             sd_deltachl = sd(delay_deltachl, na.rm = T),
+            avg_deltapc = median(delay_deltapc, na.rm = T),
+            sd_deltapc = sd(delay_deltapc, na.rm = T),
             obsnum= n())
 
-#Add labeller object
+#Add labeler object
 pond_names <- c('Strickers' = 'Stricker\'s', 'Tiedemans' = 'Tiedeman\'s')
 
 #Figure dev
@@ -564,7 +567,63 @@ fig3_plotlabs <- c("A",'B','C','D','E','F')
 ggarrange(fig3_flush, box_flush_plot, fig3_delay, box_delay_plot, fig3_full, box_full_plot, ncol = 2, nrow = 3, common.legend = T, labels =fig3_plotlabs, label.x = 0.03, widths = c(0.7, 0.3), legend = 'bottom')
 ggsave('C:/Users/Jessica Briggs/Box/Dissertation/Sondes & Ponds/Figures/All Chlorophyll Response Timeseries.pdf', width = 6.5, height = 7, units = 'in')
 
-#Figure 4 - Flushing Response Explanatory Variables#####
+#Figure 3.5 - Phycocyanin response timeseries#####
+
+fig3_full_pc <- ggplot(exo_night_storms) +
+  geom_ribbon(data = exo_night_storms_sum, aes(x = timesincestormstart, ymin = (avg_deltapc - sd_deltapc), ymax = (avg_deltapc + sd_deltapc)), alpha = 0.2) +
+  geom_hline(yintercept = 0, linewidth = 1) +
+  geom_line(aes(x = timesincestormstart, y = pc_ugl - pre_pc_ugl, color = as.factor(year), group = stormnum), linewidth = 0.75, alpha = 0.65) +
+  geom_line(data = exo_night_storms_sum, aes(x=timesincestormstart, y = avg_deltapc), linewidth = 1) +
+  facet_wrap(~pond, labeller = as_labeller(pond_names)) +
+  scale_x_continuous(limits = c(0,10), breaks = c(0,2,4,6,8,10)) +
+  ylab(bquote('Change in Phycocyanin (\u03bcg'~L^-1~')')) + xlab('Days Since Storm Start') +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  theme_bw()+
+  theme(axis.title = element_text(size = 8))
+#legend.box.background = element_rect(color = 'black'),
+#legend.position = "inside",
+#legend.position.inside = c(0.9, 0.7))
+fig3_full_pc
+
+fig3_flush_pc <- ggplot(exo_flush) +
+  #geom_ribbon(data = exo_flush_sum, aes(x = timesincestormstart, ymin = (avg_deltapc - sd_deltapc), ymax = (avg_deltapc + sd_deltapc)), alpha = 0.2) +
+  geom_hline(yintercept = 0, linewidth = 1) +
+  geom_line(aes(x = timesincestormstart, y = pc_ugl - pre_pc_ugl, color = as.factor(year), group = stormnum), linewidth = 0.75, alpha = 0.65) +
+  #geom_line(data = exo_flush_sum, aes(x=timesincestormstart, y = avg_deltapc), linewidth = 2) +
+  facet_wrap(~pond, labeller = as_labeller(pond_names)) +
+  scale_x_continuous(limits = c(0,5)) +
+  ylab(bquote('Change in Phycocyanin (\u03bcg'~L^-1~')')) + xlab('Days Since Storm Start') +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  theme_bw() +
+  theme(axis.title = element_text(size = 8))
+#theme(legend.box.background = element_rect(color = 'black'),
+#legend.position = "inside",
+#legend.position.inside = c(0.9, 0.7))
+fig3_flush_pc
+
+fig3_delay <- ggplot(delayresp_plotinput) +
+  #geom_ribbon(data = exo_delay_sum, aes(x = timesincestormstart, ymin = (avg_deltapc - sd_deltapc), ymax = (avg_deltapc + sd_deltapc)), alpha = 0.2) +
+  geom_hline(yintercept = 0, linewidth = 1) +
+  geom_line(aes(x = timesincestormstart, y = delay_deltapc, color = as.factor(year), group = stormnum), linewidth = 0.75, alpha = 0.65) +
+  #geom_line(data = exo_delay_sum, aes(x=timesincestormstart, y = avg_deltachl), linewidth = 2) +
+  facet_wrap(~pond, labeller = as_labeller(pond_names)) +
+  scale_x_continuous(limits = c(0,10)) +
+  ylab(bquote('Change in Phycocyanin (\u03bcg'~L^-1~')')) + xlab('Days Since Storm Start') +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  theme_bw() +
+  theme(axis.title = element_text(size = 8))
+#theme(legend.box.background = element_rect(color = 'black'),
+#legend.position = "inside",
+#legend.position.inside = c(0.9, 0.7))
+fig3_delay
+
+#Figure 4 - Flushing Response Explanatory Variables - Chlorophyll #####
 #Input vars: Event rainfall, days since prev storm, cum precip
 flushresp <- stormresp %>%
   select(stormnum, year, pond, rise_chl_percch, precip_mm, dayssinceprevstorm, cumprecip) %>%
@@ -621,6 +680,45 @@ ggarrange(flush_precip_plot, flush_time_plot, flush_cumprecip_plot, nrow = 2, nc
 
 ggsave('C:/Users/Jessica Briggs/Box/Dissertation/Sondes & Ponds/Figures/Flushing Response Predictors.pdf', width = 9, height = 6, units = 'in')
 
+#Figure 4.5 - Flushing response explanatory variables - Phyco #####
+flushresp_pc <- stormresp %>%
+  select(stormnum, year, pond, rise_pc_percch, cumprecip, precip_mm) %>%
+  mutate(cumprecip_std = as.numeric(scale(cumprecip)),
+         precip_std = as.numeric(scale(precip_mm)))
+
+flushmod_pc <- lm(rise_pc_percch ~ cumprecip_std + precip_std, data = flushresp_pc, na.action = 'na.fail')
+summary(flushmod_pc)
+flushpreds_pc_cumprecip <- ggpredict(flushmod_pc, terms = c('cumprecip_std'))
+flushpreds_pc_precip <- ggpredict(flushmod_pc, terms = c('precip_std'))
+
+#Cumulative Precip panel
+flush_cumprecip_plot_pc <- ggplot(flushresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = flushpreds_pc_cumprecip, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = cumprecip_std, y = rise_pc_percch, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = flushpreds_pc_cumprecip, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Percent Change in Phycocyanin \n during the Immediate Period") + xlab("Standardized Cumulative Rainfall") +
+  theme_bw()
+flush_cumprecip_plot_pc
+
+#Event Precip panel
+flush_precip_plot_pc <- ggplot(flushresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = flushpreds_pc_precip, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = precip_std, y = rise_pc_percch, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = flushpreds_pc_precip, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Percent Change in Phycocyanin \n during the Immediate Period") + xlab("Standardized Event Rainfall") +
+  theme_bw()
+flush_precip_plot_pc
+
 #Figure 5 - Delayed Response Explanatory Variables######
 #Input vars: Event rainfall, days since prev storm, cum precip
 delayresp <- stormresp %>%
@@ -629,6 +727,7 @@ delayresp <- stormresp %>%
          dayssinceprevstorm_std = as.numeric(scale(dayssinceprevstorm)))
 
 delaymod <- lm(delay_chl_slope ~ flush_std * dayssinceprevstorm_std, data = delayresp)
+summary(delaymod)
 delaypreds_flush <- ggpredict(delaymod, terms = c('flush_std'))
 delaypreds_time <- ggpredict(delaymod, terms = c('dayssinceprevstorm_std'))
 delaypreds_int <- predict_response(delaymod, terms = c('flush_std','dayssinceprevstorm_std [-1,0,1,2]'))
@@ -681,6 +780,193 @@ ggsave('C:/Users/Jessica Briggs/Box/Dissertation/Sondes & Ponds/Figures/Delayed 
 fig5_plotlabs <- c("A",'B','C')
 ggarrange(delay_time_plot, delay_flush_plot, delay_int_plot, nrow = 2, ncol = 2, labels = fig5_plotlabs, label.x = 0.1, common.legend = T, legend = 'right')
 ggsave('C:/Users/Jessica Briggs/Box/Dissertation/Sondes & Ponds/Figures/Delayed Response Predictors.pdf', width = 10, height = 7, units = 'in')
+
+
+#Figure 5.5 - Delayed Response Explanatory Variables - Phyco#####
+delayresp_pc <- stormresp %>%
+  select(stormnum, year, pond, delay_pc_slope, pre_pc_ugl, risetime_hr, rise_pc_percch) %>%
+  mutate(flush_std = as.numeric(scale(rise_pc_percch)),
+         risetime_std = as.numeric(scale(risetime_hr)),
+         pre_pc_std = as.numeric(scale(pre_pc_ugl)))
+
+delaymod_pc <- lm(delay_pc_slope ~ pre_pc_std + risetime_std + flush_std + pre_pc_std:risetime_std + pre_pc_std:flush_std + risetime_std:flush_std, data = delayresp_pc)
+summary(delaymod_pc)
+delaypreds_flush <- ggpredict(delaymod_pc, terms = c('flush_std'))
+delaypreds_time <- ggpredict(delaymod_pc, terms = c('risetime_std'))
+delaypreds_pc <- ggpredict(delaymod_pc, terms = c('pre_pc_std'))
+delaypreds_int_timeflush <- predict_response(delaymod_pc, terms = c('risetime_std','flush_std [-2, -1,0,1,2,3]'))
+delaypreds_int_pretime <- predict_response(delaymod_pc, terms = c('pre_pc_std','risetime_std [-1,0,1,2,3]'))
+delaypreds_int_preflush <- predict_response(delaymod_pc, terms = c('pre_pc_std','flush_std [-2,-1,0,1,2,3]'))
+
+#Immediate response - not sig in model
+delay_flush_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  #geom_ribbon(data = delaypreds_flush, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = flush_std, y = delay_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  #geom_line(data = delaypreds_flush, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Immediate Period") +
+  theme_bw()
+delay_flush_plot_pc
+
+#Rise time
+delay_time_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = delaypreds_time, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = risetime_std, y = delay_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = delaypreds_time, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Length of Rising Limb (hours)") +
+  theme_bw()
+delay_time_plot_pc
+
+#Pre PC conditions
+delay_pre_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = delaypreds_pc, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = pre_pc_std, y = delay_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = delaypreds_pc, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Pre-Storm Phycocyanin \u03bcg/L") +
+  theme_bw()
+delay_pre_plot_pc
+
+#rise time and immediate response interaction
+delay_timeflush_int_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_point(aes(x = risetime_std, y = delay_pc_slope, color = flush_std), size = 3) +
+  scale_color_distiller(palette = 'BrBG') +
+  new_scale_color() +
+  geom_line(data = delaypreds_int_timeflush, aes(x=x, y = predicted, color = group), linewidth = 2) +
+  scale_color_brewer(palette = 'BrBG', direction = -1, name = 'Standardized Immediate Response') +
+  #scale_fill_brewer(palette = 'BrBG', direction = -1) +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Standardized Length of Rising Limb") +
+  theme_bw() 
+delay_timeflush_int_plot_pc
+
+#pre PC and rise time interaction
+delay_pretime_int_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_point(aes(x = pre_pc_std, y = delay_pc_slope, color = risetime_std), size = 3) +
+  scale_color_distiller(palette = 'BrBG') +
+  new_scale_color() +
+  geom_line(data = delaypreds_int_pretime, aes(x=x, y = predicted, color = group), linewidth = 2) +
+  scale_color_brewer(palette = 'BrBG', direction = -1, name = 'Standardized Length of Rising Limb') +
+  #scale_fill_brewer(palette = 'BrBG', direction = -1) +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Standardized Pre-Storm Phycocyanin Concentrations") +
+  theme_bw() 
+delay_pretime_int_plot_pc
+
+#pre PC and immediate resp interaction
+delay_preflush_int_plot_pc <- ggplot(delayresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_point(aes(x = pre_pc_std, y = delay_pc_slope, color = flush_std), size = 3) +
+  scale_color_distiller(palette = 'BrBG') +
+  new_scale_color() +
+  geom_line(data = delaypreds_int_preflush, aes(x=x, y = predicted, color = group), linewidth = 2) +
+  scale_color_brewer(palette = 'BrBG', direction = -1, name = 'Standardized Immediate Response') +
+  #scale_fill_brewer(palette = 'BrBG', direction = -1) +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Delayed Period") + xlab("Standardized Pre-Storm Phycocyanin Concentrations") +
+  theme_bw() 
+delay_preflush_int_plot_pc
+
+ggplot(data = delayresp_pc) +
+  geom_point(aes(x = risetime_std, y = flush_std)) +
+  theme_bw()
+
+
+#Figure 5.75 - Full Response Period Phycocyanin Predictors#####
+fullresp_pc <- stormresp %>%
+  select(stormnum, year, pond, post10_pc_slope, pre_pc_ugl, risetime_hr, rise_pc_percch) %>%
+  mutate(flush_std = as.numeric(scale(rise_pc_percch)),
+         risetime_std = as.numeric(scale(risetime_hr)),
+         pre_pc_std = as.numeric(scale(pre_pc_ugl)))
+
+fullmod_pc <- lm(post10_pc_slope ~ pre_pc_std + risetime_std + flush_std + pre_pc_std:risetime_std + pre_pc_std:flush_std, data = fullresp_pc)
+summary(fullmod_pc)
+fullpreds_flush <- ggpredict(fullmod_pc, terms = c('flush_std'))
+fullpreds_time <- ggpredict(fullmod_pc, terms = c('risetime_std'))
+fullpreds_pc <- ggpredict(fullmod_pc, terms = c('pre_pc_std'))
+fullpreds_int_pretime <- predict_response(fullmod_pc, terms = c('pre_pc_std','risetime_std [-1,0,1,2,3]'))
+fullpreds_int_preflush <- predict_response(fullmod_pc, terms = c('pre_pc_std','flush_std [-2,-1,0,1,2,3]'))
+
+#Immediate response
+full_flush_plot_pc <- ggplot(fullresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = fullpreds_flush, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = flush_std, y = post10_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = fullpreds_flush, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Full Period") + xlab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Immediate Period") +
+  theme_bw()
+full_flush_plot_pc
+
+#Rise time
+full_time_plot_pc <- ggplot(fullresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = fullpreds_time, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = risetime_std, y = post10_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = fullpreds_time, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Full Period") + xlab("Length of Rising Limb (hours)") +
+  theme_bw()
+full_time_plot_pc
+
+#Pre PC conditions
+full_pre_plot_pc <- ggplot(fullresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_ribbon(data = fullpreds_pc, aes(x = x, ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  geom_point(aes(x = pre_pc_std, y = post10_pc_slope, color = as.factor(year), shape = pond), size = 3) +
+  geom_line(data = fullpreds_pc, aes(x=x, y = predicted), linewidth = 1) +
+  scale_color_manual(name = 'Year',
+                     breaks = c('2022','2023','2024'),
+                     values = c('2022' = '#1b9e77','2023' = '#d95f02','2024' = '#7570b3'))+
+  scale_shape_discrete(name = 'Pond') +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Full Period") + xlab("Pre-Storm Phycocyanin \u03bcg/L") +
+  theme_bw()
+full_pre_plot_pc
+
+#pre PC and rise time interaction
+full_pretime_int_plot_pc <- ggplot(fullresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_point(aes(x = pre_pc_std, y = post10_pc_slope, color = risetime_std), size = 3) +
+  scale_color_distiller(palette = 'BrBG') +
+  new_scale_color() +
+  geom_line(data = fullpreds_int_pretime, aes(x=x, y = predicted, color = group), linewidth = 2) +
+  scale_color_brewer(palette = 'BrBG', direction = -1, name = 'Standardized Length of Rising Limb') +
+  #scale_fill_brewer(palette = 'BrBG', direction = -1) +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Full Period") + xlab("Standardized Pre-Storm Phycocyanin Concentrations") +
+  theme_bw() 
+full_pretime_int_plot_pc
+
+#pre PC and immediate resp interaction
+full_preflush_int_plot_pc <- ggplot(fullresp_pc) +
+  geom_hline(yintercept = 0, linewidth = 1, linetype = 'dashed', color = '#747474') +
+  geom_point(aes(x = pre_pc_std, y = post10_pc_slope, color = flush_std), size = 3) +
+  scale_color_distiller(palette = 'BrBG') +
+  new_scale_color() +
+  geom_line(data = fullpreds_int_preflush, aes(x=x, y = predicted, color = group), linewidth = 2) +
+  scale_color_brewer(palette = 'BrBG', direction = -1, name = 'Standardized Immediate Response') +
+  #scale_fill_brewer(palette = 'BrBG', direction = -1) +
+  scale_y_continuous(limits = c(-3,10)) +
+  ylab("Rate of Change in Phycocyanin (\u03bcg/L/day) \n during the Full Period") + xlab("Standardized Pre-Storm Phycocyanin Concentrations") +
+  theme_bw() 
+full_preflush_int_plot_pc
 
 #Figure 6 - Chemistry for Mechanism#####
 

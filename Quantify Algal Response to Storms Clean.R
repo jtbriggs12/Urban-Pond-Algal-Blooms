@@ -32,7 +32,8 @@ exo_night <- exo %>% filter(hour(datetime) < 5) %>%
   group_by(pond, year, doy) %>%
   summarize(across(chl_rfu:temp_C, mean)) %>%
   ungroup() %>%
-  select(pond, year, doy,chl_rfu, chl_ugl, pc_rfu, pc_ugl, do_sat, do_mgl, pH, temp_C)
+  select(pond, year, doy,chl_rfu, chl_ugl, pc_rfu, pc_ugl, do_sat, do_mgl, pH, temp_C) %>%
+  complete(pond, year, doy)
 write.csv(exo_night, './Output and Intermediate Files/EXO Nightly Averages.csv', row.names = F)
 
 #Filter to relevant time periods and add storm info to df#####
